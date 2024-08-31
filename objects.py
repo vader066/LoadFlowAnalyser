@@ -213,6 +213,15 @@ def MismatchV(spec, D, V, Y):
   print(mismatch)
   return mismatch
   
-    
+
+
+#This function converts values from polar form to rectangular form for calculations
+#It takes arguments of the magnitude and angle in degrees
+def rect(r, theta):
+  real = r*np.cos(np.radians(theta))
+  img = r*np.sin(np.radians(theta))
+  result = real + img*1j
+  return result
+
     
     
