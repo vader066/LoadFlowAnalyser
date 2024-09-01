@@ -5,6 +5,7 @@ import numpy as np
 
 
 def Jacobian(Kvector, Uvector, Y, V, D):
+  JacobV = np.empty(0)
   for qty in Kvector.data:
     i = qty.bus
     
@@ -27,6 +28,7 @@ def Jacobian(Kvector, Uvector, Y, V, D):
     #Generating the function of the Known Quantity
     f = generate_function(Vi, Vj, Di, Dj)
     
+    
     #Differentiating the function with respect to 
     for qty in Uvector.data:       
       var = sp.symbols(f"{qty.type}{qty.bus}")  # determining the independent variables for differentiation for each iteration
@@ -44,8 +46,11 @@ def Jacobian(Kvector, Uvector, Y, V, D):
         subs.update(sub)
         
       eval_val = diff.subs(subs)
-      print(eval_val)
-      # return diff
+      JacobV = np.append(JacobV, eval_val)
+      n = len(V)
+      # JacobM = JacobV.reshape(n, n)
+      # print(eval_val)
+  return JacobV
       
       
 
@@ -75,4 +80,6 @@ Y_matrix = np.array([[rect(24.23, -75.95), rect(12.13, 104.04), rect(12.13, 104.
                      [rect(12.13, 104.04), rect(12.13, 104.04), rect(24.23, -75.95)]],
                     dtype=np.complex64)
 
-Jacobian(specified, inital, Y_matrix, V_matrix, D_matrix)
+value = Jacobian(specified, inital, Y_matrix, V_matrix, D_matrix)
+
+print(value.shape)
