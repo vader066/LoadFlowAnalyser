@@ -5,10 +5,7 @@ Ybus = np.array([
     [4, 5]
 ])
 
-V = np.array([
-    [1],
-    [2]
-])
+V = np.array([1, 1]) 
 
 P_spec = np.array([
     [200],
