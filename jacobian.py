@@ -4,16 +4,9 @@ from powerclasses import rect
 import numpy as np
 
 
-# D, V, P = sp.symbols('D V P', real = True)
-
-# f = 4*D**2*V + 2*V**3*D
-
-# print(sp.diff(f, D))
-
-
-def Jacobian(Kvector, Y):
-  for obj in Kvector.data:
-    i = obj.bus
+def Jacobian(Kvector, Uvector, Y, V, D):
+  for qty in Kvector.data:
+    i = qty.bus
     
     #Generating the buses numbers for variables in the equation of each Known Value
     j_indices = [idx + 1 for idx in range(len(Kvector.data)) ]
@@ -25,20 +18,38 @@ def Jacobian(Kvector, Y):
     Di = sp.symbols(f"D{i}")
     Dj = [sp.symbols(f"D{j}") for j in j_indices]
     
+    #Funtion definition for Generating function for Known vector quantity Pi or Qi
     def generate_function(Vi, Vj, Di, Dj):
       summation_term = sum(Vj[k] * np.abs(Y[i-1, k]) * sp.cos(np.angle(Y[i-1, k]) + Dj[k] - Di) for k in range(len(Vj)))
       full = Vi * summation_term
-      print(full)
       return full
       
-    
+    #Generating the function of the Known Quantity
     f = generate_function(Vi, Vj, Di, Dj)
-    diff = sp.diff(f, Vj[0] )
-    print(diff)
-  
-  return diff
+    
+    #Differentiating the function with respect to 
+    for qty in Uvector.data:       
+      var = sp.symbols(f"{qty.type}{qty.bus}")  # determining the independent variables for differentiation for each iteration
+      diff = sp.diff(f, var)
+      
+      # Generating values substitution dictionary
+      subs = {}
+      
+      for item in range(len(V)):      #Values of vector V
+        sub = {f'V{item + 1}': V[item]}
+        subs.update(sub)
+        
+      for item in range(len(D)):      #Values of vector Delta
+        sub = {f'D{item + 1}': D[item]}
+        subs.update(sub)
+        
+      eval_val = diff.subs(subs)
+      print(eval_val)
+      # return diff
+      
+      
 
-
+#Test Values
 specified = pc.Kvector()
 P2 = pc.Qty("P", 2, 0.5)
 P3 = pc.Qty("P", 3, -1.5)
@@ -47,10 +58,21 @@ specified.push(P2)
 specified.push(P3)
 specified.push(Q2)
 
+inital = pc.Uvector()
+D2 = pc.Qty("D", 2, 0)
+D3 = pc.Qty("D", 3, 0)
+V2 = pc.Qty("V", 2, 0)
+inital.push(D2)
+inital.push(D3)
+inital.push(V2)
+
+V_matrix = np.array([1.04, 1, 1.04]) 
+
+D_matrix =np.array([0, 0, 0])
+
 Y_matrix = np.array([[rect(24.23, -75.95), rect(12.13, 104.04), rect(12.13, 104.04)],
                      [rect(12.13, 104.04), rect(24.23, -75.95), rect(12.13, 104.04)],
                      [rect(12.13, 104.04), rect(12.13, 104.04), rect(24.23, -75.95)]],
                     dtype=np.complex64)
 
-print(np.abs(Y_matrix[0, 0]))
-Jacobian(specified, Y_matrix)
+Jacobian(specified, inital, Y_matrix, V_matrix, D_matrix)
