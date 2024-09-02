@@ -1,5 +1,8 @@
 The Project is predominantly Object Oriented
 
+Classes and Functions are in the powerclasses.py file
+Testing.py and jacobian.py are used to test the Mismatch function and Jacobian function respectively
+
 The Quantities V, D, P, Q for Voltage, delta(angle of voltage), Real Power and Reactive Power will all be instances of the class Qty.
 
 A quantity class has properties:

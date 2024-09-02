@@ -20,19 +20,27 @@ def Jacobian(Kvector, Uvector, Y, V, D):
     Dj = [sp.symbols(f"D{j}") for j in j_indices]
     
     #Funtion definition for Generating function for Known vector quantity Pi or Qi
-    def generate_function(Vi, Vj, Di, Dj):
+    def generate_p_function(Vi, Vj, Di, Dj):
       summation_term = sum(Vj[k] * np.abs(Y[i-1, k]) * sp.cos(np.angle(Y[i-1, k]) + Dj[k] - Di) for k in range(len(Vj)))
       full = Vi * summation_term
       return full
+    
+    def generate_q_function(Vi, Vj, Di, Dj):
+      summation_term = sum(Vj[k] * np.abs(Y[i-1, k]) * sp.sin(np.angle(Y[i-1, k]) + Dj[k] - Di) for k in range(len(Vj)))
+      full = -Vi * summation_term
+      return full
       
     #Generating the function of the Known Quantity
-    f = generate_function(Vi, Vj, Di, Dj)
+    if qty.type == 'P':
+      func = generate_p_function(Vi, Vj, Di, Dj)
+    elif qty.type == 'Q':
+      func = generate_q_function(Vi, Vj, Di, Dj)
     
     
     #Differentiating the function with respect to 
     for qty in Uvector.data:       
       var = sp.symbols(f"{qty.type}{qty.bus}")  # determining the independent variables for differentiation for each iteration
-      diff = sp.diff(f, var)
+      diff = sp.diff(func, var)
       
       # Generating values substitution dictionary
       subs = {}
@@ -80,6 +88,7 @@ Y_matrix = np.array([[rect(24.23, -75.95), rect(12.13, 104.04), rect(12.13, 104.
                      [rect(12.13, 104.04), rect(12.13, 104.04), rect(24.23, -75.95)]],
                     dtype=np.complex64)
 
+
 value = Jacobian(specified, inital, Y_matrix, V_matrix, D_matrix)
 
-print(value.shape)
+print(value)
