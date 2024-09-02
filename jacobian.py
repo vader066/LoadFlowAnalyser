@@ -42,7 +42,7 @@ def Jacobian(Kvector, Uvector, Y, V, D):
       var = sp.symbols(f"{qty.type}{qty.bus}")  # determining the independent variables for differentiation for each iteration
       diff = sp.diff(func, var)
       
-      # Generating values substitution dictionary
+      # Generating values for substitution 
       subs = {}
       
       for item in range(len(V)):      #Values of vector V
@@ -56,9 +56,10 @@ def Jacobian(Kvector, Uvector, Y, V, D):
       eval_val = diff.subs(subs)
       JacobV = np.append(JacobV, eval_val)
       n = len(V)
-      # JacobM = JacobV.reshape(n, n)
       # print(eval_val)
-  return JacobV
+      
+  JacobM = JacobV.reshape(n, n)
+  return JacobM
       
       
 
@@ -91,4 +92,4 @@ Y_matrix = np.array([[rect(24.23, -75.95), rect(12.13, 104.04), rect(12.13, 104.
 
 value = Jacobian(specified, inital, Y_matrix, V_matrix, D_matrix)
 
-print(value)
+print(value.shape)
