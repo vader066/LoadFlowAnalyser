@@ -1,4 +1,5 @@
 import numpy as np
+import sympy as sp
 import bisect
 
 
@@ -210,9 +211,70 @@ def MismatchV(spec, D, V, Y):
     entry = Qty(qty_cal.type, qty_cal.bus, calc_val)
     mismatch.push(entry)
     
-  print(mismatch)
   return mismatch
   
+
+
+
+def Jacobian(Kvector, Uvector, D, V, Y):
+  JacobV = np.empty(0)
+  for qty in Kvector.data:
+    i = qty.bus
+    
+    #Generating the buses numbers for variables in the equation of each Known Value
+    j_indices = [idx + 1 for idx in range(len(Kvector.data)) ]
+  
+    
+    # Dynamically defining variables of corresponding buses
+    Vi = sp.symbols(f"V{i}")
+    Vj = [sp.symbols(f"V{j}") for j in j_indices]
+    Di = sp.symbols(f"D{i}")
+    Dj = [sp.symbols(f"D{j}") for j in j_indices]
+    
+    #Funtion definition for Generating function for Known vector quantity Pi or Qi
+    def generate_p_function(Vi, Vj, Di, Dj):
+      summation_term = sum(Vj[k] * np.abs(Y[i-1, k]) * sp.cos(np.angle(Y[i-1, k]) + Dj[k] - Di) for k in range(len(Vj)))
+      full = Vi * summation_term
+      return full
+    
+    def generate_q_function(Vi, Vj, Di, Dj):
+      summation_term = sum(Vj[k] * np.abs(Y[i-1, k]) * sp.sin(np.angle(Y[i-1, k]) + Dj[k] - Di) for k in range(len(Vj)))
+      full = -Vi * summation_term
+      return full
+      
+    #Generating the function of the Known Quantity
+    if qty.type == 'P':
+      func = generate_p_function(Vi, Vj, Di, Dj)
+    elif qty.type == 'Q':
+      func = generate_q_function(Vi, Vj, Di, Dj)
+    
+    
+    #Differentiating the function with respect to 
+    for qty in Uvector.data:       
+      var = sp.symbols(f"{qty.type}{qty.bus}")  # determining the independent variables for differentiation for each iteration
+      diff = sp.diff(func, var)
+      
+      # Generating values for substitution 
+      subs = {}
+      
+      for item in range(len(V)):      #Values of vector V
+        sub = {f'V{item + 1}': V[item]}
+        subs.update(sub)
+        
+      for item in range(len(D)):      #Values of vector Delta
+        sub = {f'D{item + 1}': D[item]}
+        subs.update(sub)
+        
+      eval_val = diff.subs(subs)
+      JacobV = np.append(JacobV, eval_val)
+      n = len(V)
+      # print(eval_val)
+      
+  JacobM = JacobV.reshape(n, n)
+  return JacobM
+
+
+
 
 
 #This function converts values from polar form to rectangular form for calculations

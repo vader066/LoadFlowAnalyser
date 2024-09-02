@@ -14,6 +14,13 @@ specified.push(P2)
 specified.push(P3)
 specified.push(Q2)
 
+inital = pc.Uvector()
+D2 = pc.Qty("D", 2, 0)
+D3 = pc.Qty("D", 3, 0)
+V2 = pc.Qty("V", 2, 0)
+inital.push(D2)
+inital.push(D3)
+inital.push(V2)
 
 V_matrix = np.array([1.04, 1, 1.04]) 
 
@@ -28,4 +35,10 @@ Y_matrix = np.array([[rect(24.23, -75.95), rect(12.13, 104.04), rect(12.13, 104.
 #NOTE: TEST VALUES WERE TAKEN FROM THE EXAMPLE 6 QUESTION IN THE SLIDES: UNIT ONE, SLIDE 86
 
 #Test  
-pc.MismatchV(specified, D_matrix, V_matrix, Y_matrix)
+mismatch = pc.MismatchV(specified, D_matrix, V_matrix, Y_matrix)
+
+jacob = pc.Jacobian(specified, inital, D_matrix, V_matrix, Y_matrix)
+
+
+print(mismatch)
+print(jacob)

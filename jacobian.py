@@ -4,7 +4,7 @@ from powerclasses import rect
 import numpy as np
 
 
-def Jacobian(Kvector, Uvector, Y, V, D):
+def Jacobian(Kvector, Uvector, D, V, Y):
   JacobV = np.empty(0)
   for qty in Kvector.data:
     i = qty.bus
@@ -90,6 +90,6 @@ Y_matrix = np.array([[rect(24.23, -75.95), rect(12.13, 104.04), rect(12.13, 104.
                     dtype=np.complex64)
 
 
-value = Jacobian(specified, inital, Y_matrix, V_matrix, D_matrix)
+value = Jacobian(specified, inital, D_matrix, V_matrix, Y_matrix)
 
-print(value.shape)
+print(value)
