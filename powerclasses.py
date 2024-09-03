@@ -211,6 +211,8 @@ def MismatchV(spec, D, V, Y):
     entry = Qty(qty_cal.type, qty_cal.bus, calc_val)
     mismatch.push(entry)
     
+  
+    
   return mismatch
   
 
@@ -265,15 +267,21 @@ def Jacobian(Kvector, Uvector, D, V, Y):
         sub = {f'D{item + 1}': D[item]}
         subs.update(sub)
         
-      eval_val = diff.subs(subs)
+      eval_val = float(diff.subs(subs))
       JacobV = np.append(JacobV, eval_val)
       n = len(V)
-      # print(eval_val)
       
   JacobM = JacobV.reshape(n, n)
   return JacobM
 
 
+#updates the Uvector, the Delta vector and the V vector
+def update(init, D, V):
+    for obj in init.data:
+      if obj.type == 'D':
+        D[obj.bus -1 ] = obj.value
+      elif obj.type == 'V':
+        V[obj.bus -1] = obj.value
 
 
 
