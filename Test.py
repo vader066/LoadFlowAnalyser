@@ -39,4 +39,4 @@ Y_matrix = np.array([[rect(24.23, -75.95), rect(12.13, 104.04), rect(12.13, 104.
 #Test  
 nr3 = NR(3, specified, initial, D_matrix, V_matrix, Y_matrix)
 
-print(nr3)
+# print(nr3)

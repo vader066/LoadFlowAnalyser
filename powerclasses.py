@@ -127,8 +127,10 @@ def calc_P_i(bus, D, V, Y):
   sum_term = 0
   for j in range(len(V)):
     #converting angles from delta array into radians
-    Dj_rad = np.radians(D[j])
-    Di_rad = np.radians(D[i])
+    # Dj_rad = np.radians(D[j])
+    # Di_rad = np.radians(D[i])
+    Dj_rad = D[j]
+    Di_rad = D[i]
     
     #computing summation terms first
     cos_term = np.cos(np.angle(Y[i, j]) + Di_rad - Dj_rad)   #this works even though it should be Dj_rad - Di_rad
@@ -158,8 +160,11 @@ def calc_Q_i(bus, D, V, Y):
   sum_term = 0
   for j in range(len(V)):
     #converting angles from delta array into radians
-    Dj_rad = np.radians(D[j])
-    Di_rad = np.radians(D[i])
+    # Dj_rad = np.radians(D[j])
+    # Di_rad = np.radians(D[i])
+    
+    Dj_rad = D[j]
+    Di_rad = D[i]
     
     #computing summation terms first
     cos_term = np.sin(np.angle(Y[i, j]) + Di_rad - Dj_rad)   #this works even though it should be Dj_rad - Di_rad
@@ -294,4 +299,21 @@ def rect(r, theta):
   return result
 
     
-    
+# transforms the initial vector object 
+# into an array of values for mathematical computation
+def arrify(vector):
+  array = []
+  for obj in vector.data:
+    array.append(obj.value)
+  return np.array(array) 
+
+# transforms the resulting array of the computation 
+# into the Uvector object to be returned
+def vectorfy(array, vector):
+  new_Vector = Uvector()
+  i = 0
+  for obj in vector.data:
+    obj.value = array[i]
+    new_Vector.push(obj)
+    i += 1
+  return new_Vector
