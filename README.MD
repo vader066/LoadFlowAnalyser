@@ -1,7 +1,7 @@
 The Project is predominantly Object Oriented
 
-Classes and Functions are in the powerclasses.py file
-Testing.py and jacobian.py are used to test the Mismatch function and Jacobian function respectively
+Classes are in the nr_models.py file
+Main Functions are in the simulation_core.py file
 
 The Quantities V, D, P, Q for Voltage, delta(angle of voltage), Real Power and Reactive Power will all be instances of the class Qty.
 
@@ -31,4 +31,9 @@ It must be empty at the time of definition
 
 It is similar to Kvector class in all other ways
 
-Mismatch calculating function:
+The rect function is used to convert complex numbers from rectangular to polar form
+
+Eg.
+rect(15, -60)
+
+can be used to enter values into the Y matrix quickly

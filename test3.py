@@ -29,8 +29,7 @@ init.push(d2)
 init.push(d3) 
 init.push(v3)
 
-v = np.array([1.0, 1.05, 0.0], dtype=np.float32)
+v = np.array([1.0, 1.05, 1.0], dtype=np.float32)
 d = np.array([0.0, 0.0,  0.0], dtype=np.float32)
 
 nr5 =   NR(5, spec, init, d, v, Y)
-
