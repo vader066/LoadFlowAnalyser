@@ -124,12 +124,13 @@ def NR(max_iters, spec, init, D, V, Y ):
     mismatch = MismatchV(spec, D, V, Y)
     jacob = Jacobian(spec, init, D, V, Y)
     x_curr = nr.eval(init, jacob, mismatch) 
-    print(x_curr[0])
+    # print(x_curr[0])
     update(x_curr[0], D, V) 
     
     # Check for convergence
     if np.linalg.norm(x_curr[1]) < tol:
         print(f"Converged in {i+1} iterations.")
+        print(x_curr[0])
         return x_curr[0]
     
   raise ValueError("Newton-Raphson did not converge within the maximum number of iterations.")
