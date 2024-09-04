@@ -40,7 +40,9 @@ def calculate_mismatch(Ybus, V, P_spec, Q_spec, bus_types):
             delta_Q[i] = Q_spec[i] - Q_calc[i]
             print(delta_P)
             
-    return delta_P, delta_Q
+    mismatch = np.concatenate((delta_P, delta_Q))
+    
+    return mismatch
 
 print(calculate_mismatch(Ybus, V, P_spec, Q_spec, bus_types))
 

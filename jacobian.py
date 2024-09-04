@@ -82,4 +82,4 @@ Y_matrix = np.array([[rect(24.23, -75.95), rect(12.13, 104.04), rect(12.13, 104.
 
 value = Jacobian(specified, inital, Y_matrix, V_matrix, D_matrix)
 
-print(value.shape)
+print(value)
