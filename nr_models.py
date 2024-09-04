@@ -1,5 +1,4 @@
 import numpy as np
-import sympy as sp
 import bisect
 
 
@@ -126,26 +125,13 @@ def calc_P_i(bus, D, V, Y):
 
   sum_term = 0
   for j in range(len(V)):
-    #converting angles from delta array into radians
-    # Dj_rad = np.radians(D[j])
-    # Di_rad = np.radians(D[i])
-    Dj_rad = D[j]
-    Di_rad = D[i]
-    
     #computing summation terms first
-    cos_term = np.cos(np.angle(Y[i, j]) + Di_rad - Dj_rad)   #this works even though it should be Dj_rad - Di_rad
+    cos_term = np.cos(np.angle(Y[i, j]) + D[j] - D[i])
     sum_term += V[j] * np.abs(Y[i, j]) * cos_term
-
-  P_i = V[i] * sum_term   #multiplying summation term with V
-
-  # print(f"P[{bus}]:", P_i)
+  P_i = V[i] * sum_term   #multiplying summation term with V  
   
   return P_i
-  
 
-
-
-  
   
 #Function to calculate Q. Takes the same arguments as for P above
 def calc_Q_i(bus, D, V, Y):
@@ -158,136 +144,34 @@ def calc_Q_i(bus, D, V, Y):
     raise TypeError(f"Admittance matrix must be a {len(V)} by {len(V)} matrix")
 
   sum_term = 0
-  for j in range(len(V)):
-    #converting angles from delta array into radians
-    # Dj_rad = np.radians(D[j])
-    # Di_rad = np.radians(D[i])
-    
-    Dj_rad = D[j]
-    Di_rad = D[i]
-    
+  for j in range(len(V)):      
     #computing summation terms first
-    cos_term = np.sin(np.angle(Y[i, j]) + Di_rad - Dj_rad)   #this works even though it should be Dj_rad - Di_rad
+    cos_term = np.sin(np.angle(Y[i, j]) + D[j] - D[i])
     sum_term += V[j] * np.abs(Y[i, j]) * cos_term
 
   Q_i = -V[i] * sum_term   #multiplying summation term with V
-
-  # print(f"Q[{bus}]:", Q_i)
-  
+    
   return Q_i
 
 
+#Evaluates the new value: X + delta_x
 
-
-
-#Function for calculating the Mismatch vector. 
-# Takes in arguments: 
-# Vector of specified values:
-# delta vector for angles of V
-# Voltage vector
-# Admittance Matrix
-
-# NOTE!!!: The vector of specified values MUST not be a normal array. It should be an
-#instance of the Kvector class 'filled' with objects of the specified values
-
-def MismatchV(spec, D, V, Y):
-  # Initialized empty Vector for calculated Values of P and Q's 
-  calc = Kvector()
-
-  #Calculating for Quantities corresponding to the same quantities in the specified vector
-  for qty in spec.data:
-    if qty.type == "P":
-      val = calc_P_i(qty.bus, D, V, Y)
-    elif qty.type == "Q":
-      val =calc_Q_i(qty.bus, D, V, Y)
-      
-    entry = Qty(qty.type, qty.bus, val)
-    calc.push(entry) 
-
-  #NOTE!! This function returns the kVector object, mismatch, initialized below  
-  mismatch = Kvector()
-
-  #Calculating differences between specified data and calculated data
-  order = len(calc.data)    
-  for i in range(order):
-    qty_cal = calc.data[i]
-    qty_spec = spec.data[i]
-    calc_val = qty_spec.value - qty_cal.value
-    entry = Qty(qty_cal.type, qty_cal.bus, calc_val)
-    mismatch.push(entry)
+def eval(initial, Jacob, mismatch):
+  # Check if the Jacobian is singular
+  if np.linalg.matrix_rank(Jacob) < Jacob.shape[0]:
+      raise ValueError("Jacobian is singular, cannot proceed with Newton-Raphson iteration.")   
     
+  # converting vector objects into numerical arrays 
+  mism = arrify(mismatch)
+  x_prev = arrify(initial)
   
-    
-  return mismatch
-  
+  #Evaluating Xk+1
+  invJacob = np.linalg.inv(Jacob)
+  delta_x = np.matmul(invJacob, mism)  
+  x_curr = x_prev + delta_x
+  x_curr_obj = vectorfy(x_curr, initial)
 
-
-
-def Jacobian(Kvector, Uvector, D, V, Y):
-  JacobV = np.empty(0)
-  for qty in Kvector.data:
-    i = qty.bus
-    
-    #Generating the buses numbers for variables in the equation of each Known Value
-    j_indices = [idx + 1 for idx in range(len(Kvector.data)) ]
-  
-    
-    # Dynamically defining variables of corresponding buses
-    Vi = sp.symbols(f"V{i}")
-    Vj = [sp.symbols(f"V{j}") for j in j_indices]
-    Di = sp.symbols(f"D{i}")
-    Dj = [sp.symbols(f"D{j}") for j in j_indices]
-    
-    #Funtion definition for Generating function for Known vector quantity Pi or Qi
-    def generate_p_function(Vi, Vj, Di, Dj):
-      summation_term = sum(Vj[k] * np.abs(Y[i-1, k]) * sp.cos(np.angle(Y[i-1, k]) + Dj[k] - Di) for k in range(len(Vj)))
-      full = Vi * summation_term
-      return full
-    
-    def generate_q_function(Vi, Vj, Di, Dj):
-      summation_term = sum(Vj[k] * np.abs(Y[i-1, k]) * sp.sin(np.angle(Y[i-1, k]) + Dj[k] - Di) for k in range(len(Vj)))
-      full = -Vi * summation_term
-      return full
-      
-    #Generating the function of the Known Quantity
-    if qty.type == 'P':
-      func = generate_p_function(Vi, Vj, Di, Dj)
-    elif qty.type == 'Q':
-      func = generate_q_function(Vi, Vj, Di, Dj)
-    
-    
-    #Differentiating the function with respect to 
-    for qty in Uvector.data:       
-      var = sp.symbols(f"{qty.type}{qty.bus}")  # determining the independent variables for differentiation for each iteration
-      diff = sp.diff(func, var)
-      
-      # Generating values for substitution 
-      subs = {}
-      
-      for item in range(len(V)):      #Values of vector V
-        sub = {f'V{item + 1}': V[item]}
-        subs.update(sub)
-        
-      for item in range(len(D)):      #Values of vector Delta
-        sub = {f'D{item + 1}': D[item]}
-        subs.update(sub)
-        
-      eval_val = float(diff.subs(subs))
-      JacobV = np.append(JacobV, eval_val)
-      n = len(V)
-      
-  JacobM = JacobV.reshape(n, n)
-  return JacobM
-
-
-#updates the Uvector, the Delta vector and the V vector
-def update(init, D, V):
-    for obj in init.data:
-      if obj.type == 'D':
-        D[obj.bus -1 ] = obj.value
-      elif obj.type == 'V':
-        V[obj.bus -1] = obj.value
-
+  return (x_curr_obj, delta_x)    #returns the result of the current iteration and the delta_x (to be used for convergence)
 
 
 #This function converts values from polar form to rectangular form for calculations
