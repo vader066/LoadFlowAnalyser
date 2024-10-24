@@ -20,9 +20,9 @@ def MismatchV(spec, D, V, Y):
 
   #Calculating for Quantities corresponding to the same quantities in the specified vector
   for qty in spec.data:
-    if qty.type == "P":
+    if qty.type.upper == "P":
       val = nr.calc_P_i(qty.bus, D, V, Y)
-    elif qty.type == "Q":
+    elif qty.type.upper == "Q":
       val = nr.calc_Q_i(qty.bus, D, V, Y)
       
     entry = nr.Qty(qty.type, qty.bus, val)
