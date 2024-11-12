@@ -45,5 +45,4 @@ Y = np.array([[rect(24.23, -75.95), rect(12.13, 104.04), rect(12.13, 104.04)],
 #Test  
 
 nr = NR(50, spec, init, d, v, Y)
-print(f'NR result: {nr}')
-  
+# print(f'NR result: {nr}')

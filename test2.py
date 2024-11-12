@@ -29,5 +29,3 @@ v = np.array([1.0, 1.0, 1.01], dtype=np.float32)
 d = np.array([0.0, 0.0, 0.0], dtype=np.float32)
 
 nr5 =  NR(5, spec, init, d, v, Y)
-print(nr5)
-

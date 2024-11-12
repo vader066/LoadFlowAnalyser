@@ -125,6 +125,9 @@ def NR(max_iters, spec, init, D, V, Y ):
     jacob = Jacobian(spec, init, D, V, Y)
     x_curr = nr.eval(init, jacob, mismatch) 
     # print(x_curr[0])
+    # print(f'mismatch: {mismatch}')
+    # print(f'voltage angles: {D}')
+    # print(f'Voltage magnitudes{V}')
     update(x_curr[0], D, V) 
     
     # Check for convergence

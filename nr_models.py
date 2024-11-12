@@ -2,8 +2,6 @@ import numpy as np
 import bisect
 
 
-
-
 #Class for the various quantites of interest for Load flow studies [P, Q, V, D]
 class Qty:
   def __init__(self, type, bus, value ):
